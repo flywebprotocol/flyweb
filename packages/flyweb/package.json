@@ -1,6 +1,6 @@
 {
   "name": "flyweb",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "description": "FlyWeb protocol — make the internet machine-readable. Core types, validation, and helpers.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -12,6 +12,9 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     }
+  },
+  "bin": {
+    "flyweb": "dist/cli.js"
   },
   "files": [
     "dist"
@@ -32,7 +35,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/flywebprotocol/flyweb",
+    "url": "git+https://github.com/flywebprotocol/flyweb.git",
     "directory": "packages/flyweb"
   },
   "homepage": "https://flyweb.io",

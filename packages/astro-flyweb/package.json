@@ -1,0 +1,48 @@
+{
+  "name": "astro-flyweb",
+  "version": "0.1.0",
+  "description": "FlyWeb integration for Astro — auto-generate /.well-known/flyweb.json for AI agent discovery.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "flyweb",
+    "astro",
+    "astro-integration",
+    "ai",
+    "structured-data",
+    "machine-readable"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/flywebprotocol/flyweb.git",
+    "directory": "packages/astro-flyweb"
+  },
+  "homepage": "https://flyweb.io",
+  "peerDependencies": {
+    "astro": ">=3.0.0"
+  },
+  "dependencies": {
+    "flyweb": "^0.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.3",
+    "astro": "^5.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0"
+  }
+}

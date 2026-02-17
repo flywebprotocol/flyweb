@@ -1,0 +1,38 @@
+{
+  "name": "sveltekit-flyweb",
+  "version": "0.1.0",
+  "description": "FlyWeb integration for SvelteKit — serve structured data to AI agents.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist"
+  },
+  "keywords": ["flyweb", "sveltekit", "svelte", "ai", "structured-data", "machine-readable"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/flywebprotocol/flyweb.git",
+    "directory": "packages/sveltekit-flyweb"
+  },
+  "homepage": "https://flyweb.io",
+  "peerDependencies": {
+    "@sveltejs/kit": ">=1.0.0"
+  },
+  "dependencies": {
+    "flyweb": "^0.3.0"
+  },
+  "devDependencies": {
+    "@sveltejs/kit": "^2.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0"
+  }
+}

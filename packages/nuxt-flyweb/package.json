@@ -1,0 +1,38 @@
+{
+  "name": "nuxt-flyweb",
+  "version": "0.1.0",
+  "description": "FlyWeb integration for Nuxt — auto-generate /.well-known/flyweb.json for AI agent discovery.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist"
+  },
+  "keywords": ["flyweb", "nuxt", "vue", "ai", "structured-data", "machine-readable"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/flywebprotocol/flyweb.git",
+    "directory": "packages/nuxt-flyweb"
+  },
+  "homepage": "https://flyweb.io",
+  "peerDependencies": {
+    "nuxt": ">=3.0.0"
+  },
+  "dependencies": {
+    "flyweb": "^0.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0"
+  }
+}

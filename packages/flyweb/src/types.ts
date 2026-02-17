@@ -22,8 +22,26 @@ export interface FlyWebConfig {
   /** Optional canonical URL of the website */
   url?: string;
 
+  /** Attribution requirements for AI agents consuming this data */
+  attribution?: FlyWebAttribution;
+
   /** Resources available on this site, keyed by name */
   resources: Record<string, FlyWebResource>;
+}
+
+/** Attribution requirements — enforced at protocol level */
+export interface FlyWebAttribution {
+  /** Whether attribution is required (default: true) */
+  required?: boolean;
+
+  /** How AI agents should format the attribution */
+  format?: string;
+
+  /** License under which content is available */
+  license?: string;
+
+  /** Whether AI responses must include a link back */
+  must_link?: boolean;
 }
 
 /**
@@ -43,7 +61,11 @@ export type EntityType =
   | 'marketplace'
   | 'forum'
   | 'wiki'
+  | 'science'
   | (string & {});
+
+/** Access tier for a resource */
+export type AccessTier = 'free' | 'paid' | 'blocked';
 
 /** A single resource exposed by the website */
 export interface FlyWebResource {
@@ -64,6 +86,12 @@ export interface FlyWebResource {
 
   /** Whether this resource requires authentication */
   auth?: boolean;
+
+  /** Access tier: free (default), paid, or blocked */
+  access?: AccessTier;
+
+  /** Resource-level attribution override */
+  attribution?: FlyWebAttribution;
 }
 
 /** Supported data formats */

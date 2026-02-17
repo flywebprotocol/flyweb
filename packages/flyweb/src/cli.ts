@@ -19,17 +19,22 @@ ${BOLD}flyweb${RESET} — Make the internet machine-readable
 ${BOLD}Usage:${RESET}
   flyweb check <url>          Check a website for FlyWeb support
   flyweb check <file>         Validate a local flyweb.json file
+  flyweb discover <url>       Discover and fetch structured data from a site
   flyweb init                 Generate a starter flyweb.json
   flyweb help                 Show this help message
 
 ${BOLD}Examples:${RESET}
   ${DIM}$ npx flyweb check https://example.com${RESET}
   ${DIM}$ npx flyweb check ./flyweb.json${RESET}
+  ${DIM}$ npx flyweb discover https://flyweb.io${RESET}
   ${DIM}$ npx flyweb init > .well-known/flyweb.json${RESET}
 
 ${DIM}https://flyweb.io${RESET}
 `);
 }
+
+const YELLOW = '\x1b[33m';
+const MAGENTA = '\x1b[35m';
 
 function printConfig(config: Record<string, unknown>): void {
   console.log(`  ${CHECK} Valid FlyWeb v${config.flyweb} config`);
@@ -42,13 +47,24 @@ function printConfig(config: Record<string, unknown>): void {
     console.log(`  ${CHECK} URL: ${CYAN}${config.url}${RESET}`);
   }
 
+  // Attribution
+  const attribution = config.attribution as Record<string, unknown> | undefined;
+  if (attribution) {
+    console.log(`  ${CHECK} Attribution: ${YELLOW}${attribution.required !== false ? 'required' : 'optional'}${RESET}`);
+    if (attribution.license) {
+      console.log(`    license: ${attribution.license}`);
+    }
+  }
+
   const resources = config.resources as Record<string, Record<string, unknown>>;
   const names = Object.keys(resources);
   console.log(`  ${CHECK} Resources: ${names.join(', ')}`);
   console.log();
 
   for (const [name, resource] of Object.entries(resources)) {
-    console.log(`  ${CYAN}${name}${RESET}`);
+    const access = (resource.access as string) || 'free';
+    const accessColor = access === 'free' ? GREEN : access === 'paid' ? YELLOW : RED;
+    console.log(`  ${CYAN}${name}${RESET} ${DIM}[${accessColor}${access}${RESET}${DIM}]${RESET}`);
     console.log(`    path:   ${resource.path}`);
     console.log(`    format: ${resource.format}`);
     console.log(`    fields: ${(resource.fields as string[]).join(', ')}`);
@@ -144,17 +160,106 @@ async function checkFile(filePath: string): Promise<void> {
   console.log(`  ${GREEN}${BOLD}All checks passed!${RESET}\n`);
 }
 
+async function discoverSite(url: string): Promise<void> {
+  const base = url.replace(/\/$/, '');
+  const flywebUrl = `${base}/.well-known/flyweb.json`;
+
+  console.log(`\n  ${BOLD}FlyWeb Discover${RESET}: ${CYAN}${url}${RESET}\n`);
+
+  let response: Response;
+  try {
+    response = await fetch(flywebUrl, { headers: { Accept: 'application/json' } });
+  } catch (err) {
+    console.log(`  ${CROSS} Could not connect to ${flywebUrl}`);
+    process.exit(1);
+  }
+
+  if (!response.ok) {
+    console.log(`  ${CROSS} No flyweb.json found (HTTP ${response.status})`);
+    process.exit(1);
+  }
+
+  const config = (await response.json()) as Record<string, unknown>;
+  const result = validate(config);
+
+  if (!result.valid) {
+    console.log(`  ${CROSS} Invalid FlyWeb config`);
+    process.exit(1);
+  }
+
+  printConfig(config);
+
+  // Fetch each resource and show a preview
+  const resources = config.resources as Record<string, Record<string, unknown>>;
+  for (const [name, resource] of Object.entries(resources)) {
+    const access = (resource.access as string) || 'free';
+    if (access === 'blocked') {
+      console.log(`  ${MAGENTA}${name}${RESET}: ${DIM}blocked — skipping${RESET}\n`);
+      continue;
+    }
+
+    const resourceUrl = `${base}${resource.path}?limit=3`;
+    console.log(`  ${BOLD}Fetching${RESET} ${CYAN}${name}${RESET} ${DIM}(first 3 items)${RESET}`);
+
+    try {
+      const res = await fetch(resourceUrl, { headers: { Accept: 'application/json' } });
+      if (!res.ok) {
+        console.log(`    ${CROSS} HTTP ${res.status}\n`);
+        continue;
+      }
+
+      const text = await res.text();
+      const format = resource.format as string;
+
+      let items: unknown[];
+      if (format === 'jsonl') {
+        items = text.split('\n').filter((l: string) => l.trim()).map((l: string) => JSON.parse(l));
+      } else {
+        const parsed = JSON.parse(text);
+        items = Array.isArray(parsed) ? parsed : [parsed];
+      }
+
+      console.log(`    ${CHECK} ${items.length} item(s) received\n`);
+
+      for (const item of items.slice(0, 3)) {
+        const obj = item as Record<string, unknown>;
+        const fields = resource.fields as string[];
+        const titleField = fields[0];
+        console.log(`    ${GREEN}>${RESET} ${BOLD}${obj[titleField] ?? '(untitled)'}${RESET}`);
+        for (const field of fields.slice(1, 4)) {
+          if (obj[field] !== undefined) {
+            const val = String(obj[field]);
+            console.log(`      ${DIM}${field}:${RESET} ${val.length > 80 ? val.slice(0, 80) + '...' : val}`);
+          }
+        }
+        console.log();
+      }
+    } catch {
+      console.log(`    ${CROSS} Could not fetch resource\n`);
+    }
+  }
+
+  console.log(`  ${GREEN}${BOLD}Discovery complete!${RESET}\n`);
+}
+
 function init(): void {
   const config = {
     flyweb: '1.0',
     entity: 'My Website',
     type: 'blog',
+    attribution: {
+      required: true,
+      format: 'Source: {entity} — {url}',
+      license: 'CC-BY-4.0',
+      must_link: true,
+    },
     resources: {
       posts: {
         path: '/.flyweb/posts',
         format: 'jsonl',
         fields: ['title', 'author', 'date', 'summary', 'content', 'tags'],
         query: '?tag={tag}&limit={n}',
+        access: 'free',
       },
     },
   };
@@ -187,6 +292,16 @@ async function main(): Promise<void> {
     } else {
       await checkFile(target);
     }
+    return;
+  }
+
+  if (command === 'discover') {
+    const target = args[1];
+    if (!target) {
+      console.log(`\n  ${CROSS} Missing URL. Usage: flyweb discover <url>\n`);
+      process.exit(1);
+    }
+    await discoverSite(target);
     return;
   }
 

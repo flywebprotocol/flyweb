@@ -1,8 +1,10 @@
 export type {
   FlyWebConfig,
   FlyWebResource,
+  FlyWebAttribution,
   EntityType,
   ResourceFormat,
+  AccessTier,
 } from './types.js';
 
 export { validate } from './validate.js';

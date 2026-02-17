@@ -1,0 +1,41 @@
+{
+  "name": "flyweb-mcp",
+  "version": "0.1.1",
+  "description": "MCP server for the FlyWeb protocol — lets AI tools discover, read, and validate FlyWeb-enabled websites",
+  "type": "module",
+  "main": "./dist/index.js",
+  "bin": {
+    "flyweb-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "flyweb",
+    "mcp",
+    "model-context-protocol",
+    "ai",
+    "machine-readable",
+    "structured-data",
+    "protocol"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/flywebprotocol/flyweb.git",
+    "directory": "packages/flyweb-mcp"
+  },
+  "homepage": "https://flyweb.io",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0"
+  }
+}
